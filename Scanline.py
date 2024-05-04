@@ -1,6 +1,6 @@
 import numpy as np
-from skimage.draw import polygon
 import matplotlib.pyplot as plt
+from matplotlib.path import Path
 
 # Define polygon vertices (x, y)
 vertices = np.array([[10, 20], [30, 40], [50, 30]])
@@ -8,11 +8,19 @@ vertices = np.array([[10, 20], [30, 40], [50, 30]])
 # Create an empty image
 image = np.ones((100, 100, 3), dtype=np.uint8) * 255  # Set background to white
 
-# Fill the polygon
-rr, cc = polygon(vertices[:, 1], vertices[:, 0])
+# Create a Path object for the polygon
+path = Path(vertices)
 
-# Fill with black color
-image[rr, cc] = [0, 0, 0]  # Black color
+# Generate a grid of points covering the image
+y, x = np.meshgrid(np.arange(image.shape[0]), np.arange(image.shape[1]))
+points = np.vstack((x.flatten(), y.flatten())).T
+
+# Check which points are inside the polygon
+mask = path.contains_points(points)
+mask = mask.reshape((image.shape[0], image.shape[1]))
+
+# Fill the polygon with black
+image[mask] = [0, 0, 0]
 
 # Display the image
 plt.imshow(image)
